@@ -17,7 +17,7 @@ CONDITION_COLS = [
     "condition_inflammation_pct",
 ]
 
-DROP_COLS = ["country_code", "country_name", "region", "sub_region", "period"]
+DROP_COLS = ["country_code", "country_name", "region", "sub_region", "period", "primary_language"]
 
 
 def create_target(df: pd.DataFrame) -> pd.DataFrame:

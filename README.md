@@ -8,7 +8,7 @@ Projekt porównujący metody klasyfikacji wieloklasowej na danych medycznych (wy
 
 ## Opis problemu
 
-Na podstawie wyników badań krwi pacjenta model klasyfikuje jego stan zdrowia do jednej z 11 klas:
+Na podstawie statystyk z wyników badań krwi model przewiduje najczęściej występujący w populacji stan, wybierany z 11 klas:
 `healthy`, `cardiovascular`, `diabetes`, `metabolic_syndrome`, `anemia`, `thyroid`,
 `vitamin_d_deficiency`, `vitamin_b12_deficiency`, `liver`, `kidney`, `inflammation`.
 
