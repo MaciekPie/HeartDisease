@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import (
-    accuracy_score,
+    balanced_accuracy_score,
     f1_score,
     precision_score,
     recall_score,
@@ -34,7 +34,7 @@ def evaluate_models(
     for name, model in models.items():
         y_pred = model.predict(X_test)
 
-        acc       = accuracy_score(y_test, y_pred)
+        acc       = balanced_accuracy_score(y_test, y_pred) # number of classes is not balanced
         f1        = f1_score(y_test, y_pred, average="macro", zero_division=0)
         precision = precision_score(y_test, y_pred, average="macro", zero_division=0)
         recall    = recall_score(y_test, y_pred, average="macro", zero_division=0)
@@ -42,7 +42,7 @@ def evaluate_models(
         print(f"\n{'='*50}")
         print(f"  {name}")
         print(f"{'='*50}")
-        print(f"  Accuracy:          {acc:.4f}")
+        print(f"  Balanced accuracy:          {acc:.4f}")
         print(f"  F1 (macro):        {f1:.4f}")
         print(f"  Precision (macro): {precision:.4f}")
         print(f"  Recall (macro):    {recall:.4f}")
@@ -50,7 +50,7 @@ def evaluate_models(
 
         rows.append({
             "Model":             name,
-            "Accuracy":          round(acc, 4),
+            "Balanced accuracy":          round(acc, 4),
             "F1 (macro)":        round(f1, 4),
             "Precision (macro)": round(precision, 4),
             "Recall (macro)":    round(recall, 4),
@@ -101,7 +101,7 @@ def _save_confusion_matrix(y_test, y_pred, name: str, results_dir: str):
 
 
 def _save_comparison_chart(df: pd.DataFrame, results_dir: str):
-    metrics = ["Accuracy", "F1 (macro)", "Precision (macro)", "Recall (macro)"]
+    metrics = ["Balanced accuracy", "F1 (macro)", "Precision (macro)", "Recall (macro)"]
     df_plot = df.set_index("Model")[metrics]
 
     fig, ax = plt.subplots(figsize=(10, 5))

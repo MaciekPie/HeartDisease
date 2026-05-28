@@ -19,11 +19,11 @@ def cross_validate_models(models: dict, X_train, y_train, n_splits: int = 5) -> 
     Performs stratified k-fold cross-validation on the training set.
     Results are returned as a DataFrame.
 
-    Metrics: accuracy, macro F1, macro Precision, macro Recall
+    Metrics: balanced accuracy, macro F1, macro Precision, macro Recall
     """
     cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
     scoring = {
-        "accuracy": "accuracy",
+        "balanced_accuracy": "balanced_accuracy",
         "f1_macro": "f1_macro",
         "precision_macro": "precision_macro",
         "recall_macro": "recall_macro",
@@ -35,8 +35,8 @@ def cross_validate_models(models: dict, X_train, y_train, n_splits: int = 5) -> 
         scores = cross_validate(model, X_train, y_train, cv=cv, scoring=scoring, n_jobs=-1)
         rows.append({
             "Model":           name,
-            "CV Accuracy":     round(np.mean(scores["test_accuracy"]), 4),
-            "CV Accuracy std": round(np.std(scores["test_accuracy"]), 4),
+            "CV Balanced accuracy":     round(np.mean(scores["test_balanced_accuracy"]), 4),
+            "CV Balanced accuracy std": round(np.std(scores["test_balanced_accuracy"]), 4),
             "CV F1 (macro)":   round(np.mean(scores["test_f1_macro"]), 4),
             "CV F1 std":       round(np.std(scores["test_f1_macro"]), 4),
             "CV Precision":    round(np.mean(scores["test_precision_macro"]), 4),

@@ -61,6 +61,6 @@ def main(data_path: str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="BloodTest Classification Pipeline")
-    parser.add_argument("--data", required=True, help="Path to the CSV data file")
+    parser.add_argument("--data", required=False, default="data/kantesti_global_health_insights_2025_2026.csv", help="Path to the CSV data file")
     args = parser.parse_args()
     main(args.data)
