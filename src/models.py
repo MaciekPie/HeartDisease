@@ -9,9 +9,9 @@ def get_models() -> dict:
     """
     Returns a dictionary of 6 tabular classification models.
     Models that support class_weight are set to 'balanced'
-    due to potential class imbalance in medical data.
+    due to potential class imbalance in medical/financial data.
     """
-    models = {
+    return {
         "LogisticRegression": LogisticRegression(
             max_iter=1000,
             class_weight="balanced",
@@ -42,4 +42,3 @@ def get_models() -> dict:
             random_state=42,
         ),
     }
-    return models
