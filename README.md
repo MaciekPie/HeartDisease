@@ -1,6 +1,6 @@
-# BloodTest Classification
+# Heart Disease Classification
 
-Projekt porównujący metody klasyfikacji wieloklasowej na danych medycznych (wyniki badań krwi).
+Projekt porównujący metody klasyfikacji binarnej do przewidywania choroby serca na podstawie danych klinicznych pacjentów.
 
 **Metody Sztucznej Inteligencji | Wrocław 2026**
 
@@ -8,41 +8,31 @@ Projekt porównujący metody klasyfikacji wieloklasowej na danych medycznych (wy
 
 ## Opis problemu
 
-Na podstawie wyników badań krwi pacjenta model klasyfikuje jego stan zdrowia do jednej z 11 klas:
-`healthy`, `cardiovascular`, `diabetes`, `metabolic_syndrome`, `anemia`, `thyroid`,
-`vitamin_d_deficiency`, `vitamin_b12_deficiency`, `liver`, `kidney`, `inflammation`.
+Na podstawie 11 cech klinicznych pacjenta (wiek, wyniki EKG, ciśnienie, tętno itp.) model przewiduje czy pacjent ma chorobę serca (0 = zdrowy, 1 = chory).
 
-Projekt obsługuje **3 zestawy danych** — przełączanie odbywa się przy minimalnych zmianach w kodzie (patrz sekcja poniżej).
+**Dane:** [Kaggle — Heart Failure Prediction Dataset (fedesoriano, 2021)](https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction)
 
----
-
-## Obsługiwane zestawy danych
-
-| # | Zestaw danych | Zadanie | Rozmiar | Link |
-|---|---|---|---|---|
-| 1 | Global Blood Test Health Insights | Wieloklasowa (11 stanów) | ~130 wierszy | [Kaggle](https://www.kaggle.com/datasets/kantesti/global-blood-test-health-insights-2025-2026) |
-| 2 | Heart Failure Prediction | Binarna (choroba serca tak/nie) | 920 wierszy | [Kaggle](https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction) |
-| 3 | Credit Card Fraud Detection | Binarna (oszustwo tak/nie) | 284k wierszy | [Kaggle](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud) |
+| Właściwość | Wartość |
+|---|---|
+| Liczba rekordów | 920 pacjentów (725 mężczyzn, 195 kobiet) |
+| Liczba cech | 11 cech wejściowych |
+| Rozkład klas | 508 chorych (55.2%) vs 410 zdrowych (44.8%) |
+| Braki danych | Brak |
 
 ---
 
 ## Struktura projektu
 
 ```
-BloodTestClassification/
-├── main.py              # Główny pipeline (preprocessing → trening → ewaluacja)
-├── eda.py               # Eksploracyjna analiza danych
+HeartDiseaseClassification/
+├── main.py                  # Uruchamia wszystkie eksperymenty
 ├── src/
-│   ├── preprocessing.py # Wczytanie, czyszczenie, podział train/val/test, skalowanie + sekcje datasetów
-│   ├── models.py        # Definicje 6 modeli ML
-│   ├── train.py         # Trening + k-fold cross-validation
-│   └── evaluate.py      # Ewaluacja, confusion matrix, wykresy
-├── app/
-│   └── app.py           # Aplikacja Streamlit + sekcje datasetów
-├── models/              # Zapisany model, scaler, feature_names (po uruchomieniu main.py)
-├── results/             # Metryki CSV, wykresy (po uruchomieniu main.py)
-│   └── eda/             # Wykresy EDA (po uruchomieniu eda.py)
-└── requirements.txt
+│   ├── preprocessing.py     # Wczytanie i przygotowanie danych
+│   ├── models.py            # Definicje 6 modeli ML
+│   ├── experiment1.py       # Porównanie modeli + test Wilcoxona
+│   ├── experiment2.py       # Wpływ parametrów modeli
+│   └── experiment3.py       # Wpływ rozmiaru zbioru treningowego
+└── results/                 # Wyniki i wykresy (generowane automatycznie)
 ```
 
 ---
@@ -60,56 +50,18 @@ pip install -r requirements.txt
 
 ---
 
-## Przełączanie zestawów danych
-
-Aby przełączyć się na inny dataset, edytuj **2 pliki**:
-
-### 1. `src/preprocessing.py`
-Zakomentuj aktywną sekcję i odkomentuj wybraną:
-```python
-# ── DATASET 1: Blood Test Classification [ACTIVE] ────────────────
-CONDITION_COLS = [ ... ]   # zakomentuj tę sekcję
-
-# ── DATASET 2: Heart Disease Prediction [INACTIVE] ───────────────
-# CONDITION_COLS = []      # odkomentuj tę sekcję
-# DROP_COLS = []
-# def create_target(df):
-#     ...
-```
-
-### 2. `app/app.py`
-Tak samo — zakomentuj blok Dataset 1, odkomentuj wybrany dataset.
-
-### 3. `main.py`
-Zmień jedną linię:
-```python
-N_SPLITS = 3   # Dataset 1 (mały zbiór danych)
-N_SPLITS = 5   # Dataset 2 lub 3
-```
-
-`eda.py`, `train.py`, `evaluate.py`, `models.py` — **bez zmian**.
-
----
-
 ## Uruchomienie
 
-### 1. EDA (opcjonalne, ale zalecane)
-```bash
-python eda.py --data <ścieżka_do_pliku.csv>
-# Wykresy → results/eda/
-```
-
-### 2. Pełny pipeline ML
 ```bash
 python main.py --data <ścieżka_do_pliku.csv>
-# Wyniki → results/metrics.csv, results/confusion_*.png
-# Model  → models/best_model.pkl
 ```
 
-### 3. Aplikacja
+Przykład:
 ```bash
-streamlit run app/app.py
+python main.py --data data/heart.csv
 ```
+
+Wszystkie wyniki trafiają automatycznie do folderu `results/`.
 
 ---
 
@@ -118,30 +70,40 @@ streamlit run app/app.py
 | Model | Opis |
 |---|---|
 | Logistic Regression | Model liniowy, baseline |
-| K-Nearest Neighbors | Klasyfikacja przez podobieństwo |
+| KNN | Klasyfikacja przez podobieństwo |
 | Decision Tree | Drzewo decyzyjne |
 | Random Forest | Ensemble drzew decyzyjnych |
 | SVM | Maszyna wektorów nośnych (kernel RBF) |
-| Gradient Boosting | Boosting gradientowy (XGBoost-style) |
+| Gradient Boosting | Boosting gradientowy |
 
-Wszystkie modele obsługujące `class_weight` mają ustawione `balanced` ze względu na możliwe niezbalansowanie klas.
+Modele obsługujące `class_weight` mają ustawione `balanced`.
+
+---
+
+## Eksperymenty
+
+### Eksperyment 1 — Porównanie modeli
+Wszystkie 6 modeli oceniane za pomocą 5x2 walidacji krzyżowej (RepeatedStratifiedKFold).
+Test Wilcoxona sprawdza czy różnice między modelami są statystycznie istotne (α = 0.05).
+
+Wyniki: `results/exp1_results.csv`, `results/exp1_comparison.png`, `results/exp1_wilcoxon.csv`
+
+### Eksperyment 2 — Wpływ parametrów
+- KNN: testowane różne wartości `n_neighbors` (1, 3, 5, 7, 10, 15)
+- Random Forest: testowane różne wartości `n_estimators` (10, 50, 100, 200, 500)
+
+Wyniki: `results/exp2_knn.csv`, `results/exp2_knn.png`, `results/exp2_random_forest.csv`, `results/exp2_random_forest.png`
+
+### Eksperyment 3 — Wpływ rozmiaru zbioru
+Wszystkie modele trenowane na podzbiorach: 20%, 30%, 50%, 70%, 100% danych.
+Wynik to krzywa uczenia — jak wyniki zmieniają się wraz z ilością danych.
+
+Wyniki: `results/exp3_results.csv`, `results/exp3_learning_curves.png`
 
 ---
 
 ## Metodologia
 
-- **Podział danych:** 60% trening / 20% walidacja / 20% test (stratyfikowany tam gdzie możliwe)
-- **Walidacja krzyżowa:** Stratyfikowany k-fold na zbiorze treningowym (k=3 dla Dataset 1, k=5 dla Dataset 2 i 3)
-- **Metryka wyboru modelu:** macro F1-score (odporna na niezbalansowanie klas)
-- **Preprocessing:** usunięcie zbędnych kolumn, one-hot encoding, StandardScaler (dopasowany tylko na train)
-
----
-
-## Wyniki
-
-Po uruchomieniu `main.py` wyniki ewaluacji dostępne są w:
-
-- `results/metrics.csv` — tabela z accuracy, F1, precision, recall dla każdego modelu
-- `results/models_comparison.png` — wykres porównawczy
-- `results/confusion_<ModelName>.png` — macierz pomyłek dla każdego modelu
-- `results/cv_results.csv` — wyniki cross-validation
+- **Walidacja krzyżowa:** 5x2 (RepeatedStratifiedKFold, n_splits=5, n_repeats=2) — 10 wyników na model
+- **Główna metryka:** Balanced Accuracy (odporna na niezbalansowanie klas)
+- **Preprocessing:** one-hot encoding zmiennych kategorycznych, StandardScaler

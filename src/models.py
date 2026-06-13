@@ -1,44 +1,39 @@
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.svm import SVC
 
 
-def get_models() -> dict:
-    """
-    Returns a dictionary of 6 tabular classification models.
-    Models that support class_weight are set to 'balanced'
-    due to potential class imbalance in medical/financial data.
-    """
-    return {
-        "LogisticRegression": LogisticRegression(
+def get_models():
+    # 6 different models to compare
+    # class_weight="balanced" tells the model that both classes are equally important
+    models = {
+        "Logistic Regression": LogisticRegression(
             max_iter=1000,
             class_weight="balanced",
-            random_state=42,
+            random_state=42
         ),
         "KNN": KNeighborsClassifier(
-            n_neighbors=5,
+            n_neighbors=5
         ),
-        "DecisionTree": DecisionTreeClassifier(
-            max_depth=10,
+        "Decision Tree": DecisionTreeClassifier(
             class_weight="balanced",
-            random_state=42,
+            random_state=42
         ),
-        "RandomForest": RandomForestClassifier(
+        "Random Forest": RandomForestClassifier(
             n_estimators=100,
             class_weight="balanced",
-            random_state=42,
+            random_state=42
         ),
         "SVM": SVC(
-            kernel="rbf",
             class_weight="balanced",
-            probability=True,   # required for predict_proba in the app
-            random_state=42,
+            probability=True,
+            random_state=42
         ),
-        "GradientBoosting": GradientBoostingClassifier(
+        "Gradient Boosting": GradientBoostingClassifier(
             n_estimators=100,
-            max_depth=4,
-            random_state=42,
+            random_state=42
         ),
     }
+    return models
