@@ -2,7 +2,8 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.model_selection import RepeatedStratifiedKFold, cross_validate
+from sklearn.model_selection import RepeatedStratifiedKFold, cross_validate, train_test_split
+from sklearn.metrics import confusion_matrix
 from scipy.stats import wilcoxon
 
 
@@ -15,7 +16,7 @@ def run_experiment1(X, y, models):
     # This gives more stable results than a single train/test split
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=2, random_state=42)
 
-    all_scores = {}  # store all 10 scores per model (needed for Wilcoxon test)
+    all_scores = {}  # store all 10 Balanced Accuracy scores per model (needed for Wilcoxon test)
     summary = []
 
     for name, model in models.items():
@@ -55,6 +56,9 @@ def run_experiment1(X, y, models):
 
     # Wilcoxon test — check if differences between models are statistically significant
     _wilcoxon_test(all_scores)
+
+    # Confusion matrices — one simple 80/20 split, just for the picture
+    _plot_confusion_matrices(X, y, models, "exp1_confusion_matrices.png", "Experiment 1")
 
     return df_results, all_scores
 
@@ -115,3 +119,44 @@ def _wilcoxon_test(all_scores):
     p_table.to_csv("results/exp1_wilcoxon.csv")
     print("\np-values saved → results/exp1_wilcoxon.csv")
 
+
+def _plot_confusion_matrices(X, y, models, filename, title_prefix):
+    # Cross-validation gives many different splits, so there is no single
+    # "test set" to draw one confusion matrix from.
+    # Instead, we do one simple 80/20 split here ONLY for this picture.
+    print(f"\nGenerating confusion matrices (separate 80/20 split, for the picture only)...")
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+
+    fig, axes = plt.subplots(2, 3, figsize=(15, 9))
+    axes = axes.flatten()
+
+    for i, (name, model) in enumerate(models.items()):
+        # Train this model on the 80% split and predict on the 20% split
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+
+        cm = confusion_matrix(y_test, y_pred)
+
+        ax = axes[i]
+        ax.imshow(cm, cmap="Blues")
+        ax.set_title(name, fontsize=10)
+        ax.set_xlabel("Predicted")
+        ax.set_ylabel("True")
+        ax.set_xticks([0, 1])
+        ax.set_yticks([0, 1])
+        ax.set_xticklabels(["Healthy", "Disease"])
+        ax.set_yticklabels(["Healthy", "Disease"])
+
+        # write the numbers inside each box
+        for row in range(2):
+            for col in range(2):
+                ax.text(col, row, cm[row, col], ha="center", va="center")
+
+    fig.suptitle(f"{title_prefix}: Confusion Matrices (80/20 split)", fontsize=14)
+    plt.tight_layout()
+    plt.savefig(f"results/{filename}", dpi=150)
+    plt.close()
+    print(f"Confusion matrices saved → results/{filename}")

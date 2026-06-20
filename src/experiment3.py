@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import RepeatedStratifiedKFold, cross_validate, train_test_split
+from sklearn.metrics import confusion_matrix
 
 
 def run_experiment3(X, y, models):
@@ -14,8 +15,10 @@ def run_experiment3(X, y, models):
     # Same cross-validation as in Experiment 1
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=2, random_state=42)
 
-    # results[model_name] = list of BA scores, one per subset size
-    results = {name: [] for name in models}
+    # results_ba[model_name]  = list of Balanced Accuracy scores, one per subset size
+    # results_f1[model_name]  = list of F1 (macro) scores, one per subset size
+    results_ba = {name: [] for name in models}
+    results_f1 = {name: [] for name in models}
 
     for size in subset_sizes:
         percent = int(size * 100)
@@ -37,28 +40,43 @@ def run_experiment3(X, y, models):
             scores = cross_validate(
                 model, X_sub, y_sub,
                 cv=cv,
-                scoring="balanced_accuracy"
+                scoring=["balanced_accuracy", "f1_macro"]
             )
-            ba = scores["test_score"].mean()
-            results[name].append(round(ba, 4))
-            print(f"  {name}: BA = {ba:.4f}")
+            ba = scores["test_balanced_accuracy"].mean()
+            f1 = scores["test_f1_macro"].mean()
 
-    # Save results table
+            results_ba[name].append(round(ba, 4))
+            results_f1[name].append(round(f1, 4))
+            print(f"  {name}: BA = {ba:.4f}, F1 = {f1:.4f}")
+
+    # Save results tables
     size_labels = [f"{int(s*100)}%" for s in subset_sizes]
-    df = pd.DataFrame(results, index=size_labels)
-    df.index.name = "Subset size"
-    df.to_csv("results/exp3_results.csv")
-    print("\nResults saved → results/exp3_results.csv")
-    print(df.to_string())
 
-    # Plot learning curves
-    _plot_learning_curves(results, size_labels)
+    df_ba = pd.DataFrame(results_ba, index=size_labels)
+    df_ba.index.name = "Subset size"
+    df_ba.to_csv("results/exp3_results_balanced_accuracy.csv")
+
+    df_f1 = pd.DataFrame(results_f1, index=size_labels)
+    df_f1.index.name = "Subset size"
+    df_f1.to_csv("results/exp3_results_f1.csv")
+
+    print("\nBalanced Accuracy results:")
+    print(df_ba.to_string())
+    print("\nF1 (macro) results:")
+    print(df_f1.to_string())
+    print("\nResults saved → results/exp3_results_balanced_accuracy.csv, results/exp3_results_f1.csv")
+
+    # Plot learning curves (Balanced Accuracy vs subset size)
+    _plot_learning_curves(results_ba, size_labels)
+
+    # Confusion matrices on the full (100%) dataset — one grid for all models
+    _plot_confusion_matrices_full(X, y, models)
 
 
-def _plot_learning_curves(results, size_labels):
+def _plot_learning_curves(results_ba, size_labels):
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    for name, scores in results.items():
+    for name, scores in results_ba.items():
         ax.plot(size_labels, scores, marker="o", label=name)
 
     ax.set_xlabel("Training data size")
@@ -71,3 +89,42 @@ def _plot_learning_curves(results, size_labels):
     plt.savefig("results/exp3_learning_curves.png", dpi=150)
     plt.close()
     print("Learning curves saved → results/exp3_learning_curves.png")
+
+
+def _plot_confusion_matrices_full(X, y, models):
+    # Confusion matrices computed on the full (100%) dataset,
+    # using one simple 80/20 split just for this picture.
+    print("\nGenerating confusion matrices on full dataset (80/20 split, for the picture only)...")
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+
+    fig, axes = plt.subplots(2, 3, figsize=(15, 9))
+    axes = axes.flatten()
+
+    for i, (name, model) in enumerate(models.items()):
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+
+        cm = confusion_matrix(y_test, y_pred)
+
+        ax = axes[i]
+        ax.imshow(cm, cmap="Blues")
+        ax.set_title(name, fontsize=10)
+        ax.set_xlabel("Predicted")
+        ax.set_ylabel("True")
+        ax.set_xticks([0, 1])
+        ax.set_yticks([0, 1])
+        ax.set_xticklabels(["Healthy", "Disease"])
+        ax.set_yticklabels(["Healthy", "Disease"])
+
+        for row in range(2):
+            for col in range(2):
+                ax.text(col, row, cm[row, col], ha="center", va="center")
+
+    fig.suptitle("Experiment 3: Confusion Matrices (100% data, 80/20 split)", fontsize=14)
+    plt.tight_layout()
+    plt.savefig("results/exp3_confusion_matrices.png", dpi=150)
+    plt.close()
+    print("Confusion matrices saved → results/exp3_confusion_matrices.png")
