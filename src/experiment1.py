@@ -25,11 +25,14 @@ def run_experiment1(X, y, models):
         scores = cross_validate(
             model, X, y,
             cv=cv,
-            scoring=["balanced_accuracy", "f1_macro"]
+            scoring=["balanced_accuracy", "f1_macro", "precision", "recall"]
         )
 
         ba_scores = scores["test_balanced_accuracy"]   # 10 values
         f1_scores = scores["test_f1_macro"]            # 10 values
+
+        precision_scores = scores["test_precision"]   # 10 values
+        recall_scores = scores["test_recall"]            # 10 values
 
         all_scores[name] = ba_scores  # save for Wilcoxon test later
 
@@ -39,6 +42,10 @@ def run_experiment1(X, y, models):
             "BA std":             round(ba_scores.std(), 4),
             "F1 (macro)":         round(f1_scores.mean(), 4),
             "F1 std":             round(f1_scores.std(), 4),
+            "Precision":         round(precision_scores.mean(), 4),
+            "Precision std":             round(precision_scores.std(), 4),
+            "Recall":         round(recall_scores.mean(), 4),
+            "Recall std":             round(recall_scores.std(), 4),
         })
 
     # Sort by Balanced Accuracy

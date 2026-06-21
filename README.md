@@ -8,7 +8,7 @@ Projekt porównujący metody klasyfikacji binarnej do przewidywania choroby serc
 
 ## Opis problemu
 
-Na podstawie 11 cech klinicznych pacjenta (wiek, wyniki EKG, ciśnienie, tętno itp.) model przewiduje czy pacjent ma chorobę serca (0 = zdrowy, 1 = chory).
+Na podstawie 11 cech klinicznych pacjenta (wiek, wyniki EKG, ciśnienie, tętno itp.) model przewiduje czy pacjent ma niewydolność serca (0 = zdrowy, 1 = chory).
 
 **Dane:** [Kaggle — Heart Failure Prediction Dataset (fedesoriano, 2021)](https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction)
 

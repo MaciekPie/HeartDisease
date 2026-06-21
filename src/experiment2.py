@@ -25,7 +25,7 @@ def _test_knn(X, y, cv):
     print("\n--- KNN: testing different n_neighbors ---")
 
     # Try different values of n_neighbors
-    neighbors_to_test = [1, 3, 5, 7, 10, 15]
+    neighbors_to_test = [1, 3, 5, 7, 9, 15]
     results = []
 
     for n in neighbors_to_test:
