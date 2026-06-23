@@ -5,18 +5,18 @@ from sklearn.metrics import confusion_matrix
 
 
 def run_experiment3(X, y, models):
-    print("\n" + "="*60)
+    print("---------------------------------------------------------")
     print("EXPERIMENT 3: Effect of Training Data Size")
-    print("="*60)
+    print("---------------------------------------------------------")
 
-    # We will test these fractions of the full dataset
+    # Procenty danych używane do eksperymentu
     subset_sizes = [0.2, 0.3, 0.5, 0.7, 1.0]
 
-    # Same cross-validation as in Experiment 1
+    # Taka sama walidacja krzyżowa jak w eksperymencie 1
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=2, random_state=42)
 
-    # results_ba[model_name]  = list of Balanced Accuracy scores, one per subset size
-    # results_f1[model_name]  = list of F1 (macro) scores, one per subset size
+    # results_ba[model_name]  = Słownik przechowujący wyniki Balanced Accuracy dla każdego modelu i każdej wielkości zbioru danych
+    # results_f1[model_name]  = Słownik przechowujący wyniki F1 (macro) dla każdego modelu i każdej wielkości zbioru danych
     results_ba = {name: [] for name in models}
     results_f1 = {name: [] for name in models}
 
@@ -24,16 +24,16 @@ def run_experiment3(X, y, models):
         percent = int(size * 100)
         print(f"\n--- Subset size: {percent}% ({int(len(X) * size)} samples) ---")
 
-        # Take a stratified sample of the data
+        # Pobranie próbki z zachowaniem proporcji klas
         if size < 1.0:
             X_sub, _, y_sub, _ = train_test_split(
                 X, y,
                 train_size=size,
                 random_state=42,
-                stratify=y   # keep class proportions
+                stratify=y   # Zachowanie proporcji klas
             )
         else:
-            # Use the full dataset
+            # Wykorzystanie całego zbioru danych
             X_sub, y_sub = X, y
 
         for name, model in models.items():
@@ -49,7 +49,7 @@ def run_experiment3(X, y, models):
             results_f1[name].append(round(f1, 4))
             print(f"  {name}: BA = {ba:.4f}, F1 = {f1:.4f}")
 
-    # Save results tables
+    # Zapisz wyniki
     size_labels = [f"{int(s*100)}%" for s in subset_sizes]
 
     df_ba = pd.DataFrame(results_ba, index=size_labels)
@@ -66,10 +66,10 @@ def run_experiment3(X, y, models):
     print(df_f1.to_string())
     print("\nResults saved → results/exp3_results_balanced_accuracy.csv, results/exp3_results_f1.csv")
 
-    # Plot learning curves (Balanced Accuracy vs subset size)
+    # Generowanie krzywych uczenia
     _plot_learning_curves(results_ba, size_labels)
 
-    # Confusion matrices on the full (100%) dataset — one grid for all models
+    # Macierze pomyłek wygenerowane dla pełnego zbioru danych (100% dostępnych próbek)
     _plot_confusion_matrices_full(X, y, models)
 
 
@@ -92,8 +92,7 @@ def _plot_learning_curves(results_ba, size_labels):
 
 
 def _plot_confusion_matrices_full(X, y, models):
-    # Confusion matrices computed on the full (100%) dataset,
-    # using one simple 80/20 split just for this picture.
+    # Macierze pomyłek wyznaczane dla pełnego zbioru danych, przy użyciu pojedynczego podziału 80/20 wyłącznie do wizualizacji
     print("\nGenerating confusion matrices on full dataset (80/20 split, for the picture only)...")
 
     X_train, X_test, y_train, y_test = train_test_split(

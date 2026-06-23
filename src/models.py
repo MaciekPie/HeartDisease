@@ -6,8 +6,8 @@ from sklearn.svm import SVC
 
 
 def get_models():
-    # 6 different models to compare
-    # class_weight="balanced" tells the model that both classes are equally important
+    # Zestaw modeli używanych do porównania
+    # class_weight="balanced" kompensuje niezbalansowanie klas
     models = {
         "Logistic Regression": LogisticRegression(
             max_iter=1000,

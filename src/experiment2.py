@@ -7,24 +7,24 @@ from sklearn.metrics import confusion_matrix
 
 
 def run_experiment2(X, y):
-    print("\n" + "="*60)
+    print("---------------------------------------------------------")
     print("EXPERIMENT 2: Effect of Model Parameters")
-    print("="*60)
+    print("---------------------------------------------------------")
 
-    # Same cross-validation as in Experiment 1
+    # Taka sama walidacja krzyżowa jak w eksperymencie 1
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=2, random_state=42)
 
-    # Test KNN with different numbers of neighbors
+    # Badanie wpływu liczby sąsiadów w KNN
     _test_knn(X, y, cv)
 
-    # Test Random Forest with different numbers of trees
+    # Badanie wpływu liczby drzew w Random Forest
     _test_random_forest(X, y, cv)
 
 
 def _test_knn(X, y, cv):
     print("\n--- KNN: testing different n_neighbors ---")
 
-    # Try different values of n_neighbors
+    # Test różnych wartości liczby sąsiadów
     neighbors_to_test = [1, 3, 5, 7, 9, 15]
     results = []
 
@@ -49,7 +49,7 @@ def _test_knn(X, y, cv):
     df = pd.DataFrame(results)
     df.to_csv("results/exp2_knn.csv", index=False)
 
-    # Line plot: Balanced Accuracy and F1 vs n_neighbors
+    # Wykres zależności jakości klasyfikacji od liczby sąsiadów
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.plot(df["n_neighbors"], df["Balanced Accuracy"], marker="o", label="Balanced Accuracy", color="steelblue")
     ax.plot(df["n_neighbors"], df["F1 (macro)"], marker="s", label="F1 (macro)", color="orange")
@@ -63,7 +63,7 @@ def _test_knn(X, y, cv):
     plt.close()
     print("Chart saved → results/exp2_knn.png")
 
-    # Confusion matrix for the best n_neighbors value found
+    # Wygenerowanie macierzy pomyłek dla najlepszego znalezionego parametru
     best_n = df.sort_values("Balanced Accuracy", ascending=False).iloc[0]["n_neighbors"]
     best_n = int(best_n)
     print(f"  Best n_neighbors = {best_n} → drawing its confusion matrix")
@@ -106,7 +106,7 @@ def _test_random_forest(X, y, cv):
     df = pd.DataFrame(results)
     df.to_csv("results/exp2_random_forest.csv", index=False)
 
-    # Line plot: Balanced Accuracy and F1 vs n_estimators
+    # Wykres zależności wartości Balanced Accuracy i F1 od liczby drzew w modelu
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.plot(df["n_estimators"], df["Balanced Accuracy"], marker="o", label="Balanced Accuracy", color="green")
     ax.plot(df["n_estimators"], df["F1 (macro)"], marker="s", label="F1 (macro)", color="orange")
@@ -120,7 +120,7 @@ def _test_random_forest(X, y, cv):
     plt.close()
     print("Chart saved → results/exp2_random_forest.png")
 
-    # Confusion matrix for the best n_estimators value found
+    # Wygenerowanie macierzy pomyłek dla najlepszego znalezionego parametru n_estimators
     best_n = df.sort_values("Balanced Accuracy", ascending=False).iloc[0]["n_estimators"]
     best_n = int(best_n)
     print(f"  Best n_estimators = {best_n} → drawing its confusion matrix")
@@ -133,7 +133,7 @@ def _test_random_forest(X, y, cv):
 
 
 def _plot_single_confusion_matrix(X, y, model, title, filename):
-    # One simple 80/20 split, just for this picture
+    # Prosty podział danych 80/20 wykorzystywany wyłącznie do celów wizualizacji
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
     )

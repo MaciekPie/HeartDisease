@@ -1,12 +1,11 @@
 """
-main.py — runs all 3 experiments for Heart Disease classification
-
-Usage:
+Uruchomienie:
     python main.py --data <path_to_csv>
 
-Example:
+Przykład:
     python main.py --data data/heart.csv
 """
+
 import os
 import argparse
 
@@ -18,25 +17,26 @@ from src.experiment3 import run_experiment3
 
 
 def main(data_path):
-    # Create folder for results
+    # Stwórz folder na resultaty
     os.makedirs("results", exist_ok=True)
 
-    # Step 1: Load and prepare the data
+    # 1. Załaduj dane
     print("Loading data...")
     X, y = load_data(data_path)
 
-    # Step 2: Get all 6 models
+    # 2. Inicjalizacja modeli
     models = get_models()
 
-    # Step 3: Run all experiments
-    run_experiment1(X, y, models)   # compare all models + Wilcoxon test
-    run_experiment2(X, y)           # test different model parameters
-    run_experiment3(X, y, models)   # test different training data sizes
+    # 3. Uruchom eksperymenty
+    run_experiment1(X, y, models)   # porównaj modele + test Wilcoxona
+    run_experiment2(X, y)           # przetestuj różne parametry
+    run_experiment3(X, y, models)   # przetestuj różne wielkości zbiorów
 
-    print("\n" + "="*60)
+    print("\n")
+    print("---------------------------------------------------------")
     print("All experiments done!")
     print("Results saved in the results/ folder.")
-    print("="*60)
+    print("---------------------------------------------------------")
 
 
 if __name__ == "__main__":

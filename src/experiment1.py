@@ -8,15 +8,18 @@ from scipy.stats import wilcoxon
 
 
 def run_experiment1(X, y, models):
-    print("\n" + "="*60)
+    print("---------------------------------------------------------")
     print("EXPERIMENT 1: Model Comparison")
-    print("="*60)
+    print("---------------------------------------------------------")
 
-    # 5x2 cross-validation: 5 splits repeated 2 times = 10 results per model
-    # This gives more stable results than a single train/test split
+    # Walidacja krzyżowa 5x2:
+    # dane dzielimy na 5 czesci, 2 razy (10 wyników na model).
+    # Zapewnia bardziej stabilne wyniki niż pojedynczy podział train/test.
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=2, random_state=42)
 
-    all_scores = {}  # store all 10 Balanced Accuracy scores per model (needed for Wilcoxon test)
+    # Słownik przechowujący wszystkie wyniki Balanced Accuracy
+    # dla każdego modelu (potrzebne do testu Wilcoxona)
+    all_scores = {}
     summary = []
 
     for name, model in models.items():
@@ -28,13 +31,15 @@ def run_experiment1(X, y, models):
             scoring=["balanced_accuracy", "f1_macro", "precision", "recall"]
         )
 
-        ba_scores = scores["test_balanced_accuracy"]   # 10 values
-        f1_scores = scores["test_f1_macro"]            # 10 values
+        # Pobranie wyników z kolejnych iteracji walidacji krzyżowej
+        ba_scores = scores["test_balanced_accuracy"] # 10 wartości
+        f1_scores = scores["test_f1_macro"]          # 10 wartości
 
-        precision_scores = scores["test_precision"]   # 10 values
-        recall_scores = scores["test_recall"]            # 10 values
+        precision_scores = scores["test_precision"] # 10 wartości
+        recall_scores = scores["test_recall"]       # 10 wartości
 
-        all_scores[name] = ba_scores  # save for Wilcoxon test later
+        # Zapis wyników do późniejszego porównania statystycznego (Wilcoxon)
+        all_scores[name] = ba_scores
 
         summary.append({
             "Model":              name,
@@ -48,23 +53,23 @@ def run_experiment1(X, y, models):
             "Recall std":             round(recall_scores.std(), 4),
         })
 
-    # Sort by Balanced Accuracy
+    # Posortowanie modeli według Balanced Accuracy
     df_results = pd.DataFrame(summary).sort_values("Balanced Accuracy", ascending=False)
 
     print("\nResults:")
     print(df_results.to_string(index=False))
 
-    # Save results to CSV
+    # Zapis wyników do pliku CSV
     df_results.to_csv("results/exp1_results.csv", index=False)
     print("\nResults saved → results/exp1_results.csv")
 
-    # Bar chart comparing models
+    # Wykres słupkowy porównujący modele
     _plot_comparison(df_results)
 
-    # Wilcoxon test — check if differences between models are statistically significant
+    # Test Wilcoxona sprawdzający, czy różnice między modelami są istotne statystycznie
     _wilcoxon_test(all_scores)
 
-    # Confusion matrices — one simple 80/20 split, just for the picture
+    # Macierze pomyłek generowane na jednym podziale 80/20 (do wizualizacji wyników)
     _plot_confusion_matrices(X, y, models, "exp1_confusion_matrices.png", "Experiment 1")
 
     return df_results, all_scores
@@ -119,7 +124,7 @@ def _wilcoxon_test(all_scores):
                     _, p = wilcoxon(all_scores[m1], all_scores[m2])
                     p_table.loc[m1, m2] = round(p, 4)
                 except Exception:
-                    # wilcoxon fails if both arrays are identical
+                    # Test może zwrócić błąd przy identycznych wynikach
                     p_table.loc[m1, m2] = "1.0"
 
     print(p_table.to_string())
@@ -128,9 +133,9 @@ def _wilcoxon_test(all_scores):
 
 
 def _plot_confusion_matrices(X, y, models, filename, title_prefix):
-    # Cross-validation gives many different splits, so there is no single
-    # "test set" to draw one confusion matrix from.
-    # Instead, we do one simple 80/20 split here ONLY for this picture.
+    # Walidacja krzyżowa tworzy wiele różnych podziałów danych,
+    # dlatego nie istnieje pojedynczy zbiór testowy.
+    # Dla wizualizacji wykonywany jest jeden podział 80/20.
     print(f"\nGenerating confusion matrices (separate 80/20 split, for the picture only)...")
 
     X_train, X_test, y_train, y_test = train_test_split(
@@ -141,7 +146,7 @@ def _plot_confusion_matrices(X, y, models, filename, title_prefix):
     axes = axes.flatten()
 
     for i, (name, model) in enumerate(models.items()):
-        # Train this model on the 80% split and predict on the 20% split
+        # Trenowanie modelu na 80% danych i wykonanie predykcji na pozostałych 20%
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
@@ -157,7 +162,7 @@ def _plot_confusion_matrices(X, y, models, filename, title_prefix):
         ax.set_xticklabels(["Healthy", "Disease"])
         ax.set_yticklabels(["Healthy", "Disease"])
 
-        # write the numbers inside each box
+        # Wyświetlenie wartości wewnątrz pól macierzy
         for row in range(2):
             for col in range(2):
                 ax.text(col, row, cm[row, col], ha="center", va="center")
