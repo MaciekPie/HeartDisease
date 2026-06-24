@@ -117,7 +117,7 @@ def _test_random_forest(X, y, cv):
 
     for i, n_trees in enumerate(trees_to_test):
         model = RandomForestClassifier(
-            n_estimators=n,
+            n_estimators=n_trees,
             class_weight="balanced",
             random_state=42
         )
