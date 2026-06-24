@@ -11,19 +11,21 @@ def load_data(path):
     print(df["HeartDisease"].value_counts())
     print()
 
-    # Zmienna docelowa (0 = zdrowy, 1 = choroba serca)
+    # Zmienna docelowa y (0 = zdrowy, 1 = choroba serca)
     y = df["HeartDisease"]
 
     # Wszystkie pozostałe kolumny jako cechy wejściowe
     X = df.drop(columns=["HeartDisease"])
 
-    # Zamiana danych tekstowych na wartości numeryczne przy użyciu kodowania One-Hot Encoding
+    # One-Hot Encoding: zamiana kolumn tekstowych (np. "Male"/"Female")
+    # na kolumny binarne (0 lub 1). Modele ML wymagają danych liczbowych.
     X = pd.get_dummies(X)
 
     print(f"Number of features after encoding: {len(X.columns)}")
     print(f"Feature names: {list(X.columns)}\n")
 
-    # Standaryzacja danych (istotna m.in. dla KNN i SVM)
+    # Standaryzacja danych: przeskalowanie cech do średniej=0 i odchylenia=1 (istotna m.in. dla KNN i SVM)
+    # Jest to ważne szczególnie dla KNN i SVM, które są czułe na skalę danych
     scaler = StandardScaler()
     X_scaled = pd.DataFrame(
         scaler.fit_transform(X),

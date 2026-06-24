@@ -6,29 +6,30 @@ from sklearn.svm import SVC
 
 
 def get_models():
-    # Zestaw modeli używanych do porównania
-    # class_weight="balanced" kompensuje niezbalansowanie klas
+    # Słownik modeli: klucz = nazwa (do wykresów), wartość = obiekt modelu
+    # class_weight="balanced" sprawia, że model zwraca większą uwagę
+    # na rzadszą klasę — zapobiega ignorowaniu mniejszościowej grupy
     models = {
         "Logistic Regression": LogisticRegression(
-            max_iter=1000,
+            max_iter=1000, # maksymalna liczba iteracji optymalizacji
             class_weight="balanced",
             random_state=42
         ),
         "KNN": KNeighborsClassifier(
-            n_neighbors=5
+            n_neighbors=5 # domyślna liczba sąsiadów
         ),
         "Decision Tree": DecisionTreeClassifier(
             class_weight="balanced",
             random_state=42
         ),
         "Random Forest": RandomForestClassifier(
-            n_estimators=100,
+            n_estimators=100, # liczba drzew w lesie
             class_weight="balanced",
             random_state=42
         ),
         "SVM": SVC(
             class_weight="balanced",
-            probability=True,
+            probability=True, # wymagane do obliczania prawdopodobieństw
             random_state=42
         ),
         "Gradient Boosting": GradientBoostingClassifier(

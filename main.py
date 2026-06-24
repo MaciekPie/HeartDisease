@@ -17,29 +17,30 @@ from src.experiment3 import run_experiment3
 
 
 def main(data_path):
-    # Stwórz folder na resultaty
+    # Stwórz folder na wyniki jeśli nie istnieje
     os.makedirs("results", exist_ok=True)
 
-    # 1. Załaduj dane
+    # 1. Wczytaj dane z pliku CSV
     print("Loading data...")
     X, y = load_data(data_path)
 
-    # 2. Inicjalizacja modeli
+    # 2. Stwórz słownik z modelami do porównania
     models = get_models()
 
-    # 3. Uruchom eksperymenty
+    # 3. Uruchom kolejno trzy eksperymenty
     run_experiment1(X, y, models)   # porównaj modele + test Wilcoxona
-    run_experiment2(X, y)           # przetestuj różne parametry
-    run_experiment3(X, y, models)   # przetestuj różne wielkości zbiorów
+    run_experiment2(X, y)           # wpływ parametrów modelu na wyniki
+    run_experiment3(X, y, models)   # wpływ wielkości zbioru treningowego
 
     print("\n")
     print("---------------------------------------------------------")
-    print("All experiments done!")
-    print("Results saved in the results/ folder.")
+    print("All experiments finished!")
+    print("Scores are saved in results/")
     print("---------------------------------------------------------")
 
 
 if __name__ == "__main__":
+    # Obsługa argumentów z linii poleceń
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", required=True, help="Path to the CSV file")
     args = parser.parse_args()
